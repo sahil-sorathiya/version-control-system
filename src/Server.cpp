@@ -1,7 +1,6 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
-#include <string>
 #include <bits/stdc++.h>
 #include <zlib.h>
 #include "utils.h"
@@ -14,9 +13,6 @@ int main(int argc, char *argv[])
     // Flush after every cout / cerr
     cout << unitbuf;
     cerr << unitbuf;
-
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    // cout << "Logs from your program will appear here!\n";
 
     if (argc < 2) {
         cerr << "No command provided.\n";
@@ -102,7 +98,12 @@ int main(int argc, char *argv[])
 
         else if (command == "hash-object") {
             try {
-                if (argc < 4 || string(argv[2]) != "-w") {
+                if (argc != 4) {
+                    cout << "Incorrect command(git hash-object -w <file-name>)" << endl;
+                    return EXIT_FAILURE;
+                }
+
+                if(string(argv[2]) != "-w"){
                     cout << "Incorrect command(git hash-object -w <file-name>)" << endl;
                     return EXIT_FAILURE;
                 }
@@ -141,31 +142,21 @@ int main(int argc, char *argv[])
 
         else if (command == "ls-tree") {
             try {
-                if (argc < 3) {
+                if (argc != 4) {
                     cerr << "Incorrect Parameter. git ls-tree --name-only <hash>\n";
                     return EXIT_FAILURE;
                 } 
-                if (argc == 4 && string(argv[2]) != "--name-only") {
+                if (string(argv[2]) != "--name-only") {
                     cerr << "Missing parameter: --name-only <hash>\n";
                     return EXIT_FAILURE;
                 }
 
-                if(argc == 3){
-                    string hash = argv[2];
-                    if (hash.size() != 40) {
-                        cerr << "Invalid Git blob hash length.\n";
-                        return 1;
-                    }
-                    decompressZlibTree(hash, false);
-                } 
-                else {
-                    string hash = argv[3];
-                    if (hash.size() != 40) {
-                        cerr << "Invalid Git blob hash length.\n";
-                        return 1;
-                    }
-                    decompressZlibTree(hash, true);
+                string hash = argv[3];
+                if (hash.size() != 40) {
+                    cerr << "Invalid Git blob hash length.\n";
+                    return 1;
                 }
+                decompressZlibTree(hash, true);
             } 
             catch (const runtime_error& e) {
                 cerr << "Error: " << e.what() << endl;
@@ -269,7 +260,6 @@ int main(int argc, char *argv[])
             }
 
         }
-
 
         else if(command == "add") {
             try {

@@ -1,59 +1,114 @@
-[![progress-banner](https://backend.codecrafters.io/progress/git/bccf4831-6f94-43e1-9e50-e84081f56bf3)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
-
-This is a starting point for C++ solutions to the
-["Build Your Own Git" Challenge](https://codecrafters.io/challenges/git).
-
-In this challenge, you'll build a small Git implementation that's capable of
-initializing a repository, creating commits and cloning a public repository.
-Along the way we'll learn about the `.git` directory, Git objects (blobs,
-commits, trees etc.), Git's transfer protocols and more.
-
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
-
-# Passing the first stage
-
-The entry point for your Git implementation is in `src/Server.cpp`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
-
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
-```
-
-That's all!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
+# Setup
 
 1. Ensure you have `cmake` installed locally
-1. Run `./your_program.sh` to run your Git implementation, which is implemented
-   in `src/Server.cpp`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+2. Run `./mygit.sh` to run your Git implementation, which is implemented in `src/Server.cpp`.
 
-# Testing locally
+# Caution
 
-The `your_program.sh` script is expected to operate on the `.git` folder inside
-the current working directory. If you're running this inside the root of this
-repository, you might end up accidentally damaging your repository's `.git`
-folder.
+1. The `mygit.sh` script is expected to operate on the `.git` folder inside the current working directory.  
+   If you're running this inside the root of this repository, you might end up accidentally damaging your repository's `.git` folder.
+   I suggest executing `mygit.sh` in a different folder when testing locally. For example: 
+   ```bash
+   mkdir -p /tmp/testing && cd /tmp/testing
+   /path/to/your/repo/mygit.sh init
+   ```
+   To make this easier to type out, you could add a [shell alias](https://shapeshed.com/unix-alias/):
 
-We suggest executing `your_program.sh` in a different folder when testing
-locally. For example:
+   ```bash
+   alias mygit=/path/to/repo/mygit.sh
+   mkdir -p /tmp/testing && cd /tmp/testing
+   mygit init
+   ```
 
-```sh
-mkdir -p /tmp/testing && cd /tmp/testing
-/path/to/your/repo/your_program.sh init
+1. The `mygit.sh` script is expected to run from the root directory of your repository only, otherwise it will give unexpected results.
+   ```bash
+   cd /path/to/root/of/repository
+   ./mygit.sh <commands>
+   ```
+
+# Supported Commands
+
+## init
+Initializes a new Git repository in the current directory, creating a `.git` folder to track version history.
+```bash
+./mygit.sh init
 ```
 
-To make this easier to type out, you could add a
-[shell alias](https://shapeshed.com/unix-alias/):
+## cat-file
+Displays the content or type or size of a Git object by its hash.
+```bash
+./mygit.sh cat-file <option> <hash>
+```
+### Options
+`-p` : Content  
+`-t` : Object Type (Blob / Tree / Commit)  
+`-s` : Size  
 
+### hash
+It must be from object directory.  
+20 Bytes (40 Character) HEX hash.  
+
+```bash
+b72ab5b7815de62b37edbcf91501459c5151cb30
+```
+first two character = directory name in `/objects`.   
+next 38 character = file name in that directory.  
+For e.g.
+```bash
+.git/
+ └── objects/
+     └── b7/
+         └── 2ab5b7815de62b37edbcf91501459c5151cb30
+```
+
+## hash-object
+Compress the file convert it into `git object`.  
+Calculates the SHA1 hash of an object and store it in the git object database ans returns its hash
+```bash
+./mygit.sh hash-object -w <file-path>
+```
+
+## ls-tree
+Lists the contents of a given tree object
+```bash
+./mygit.sh ls-tree --name-only <tree-object-hash>
+```
+
+## write-tree
+Creates a tree object from the current index (staging area) and returns its hash.
+```bash
+./mygit.sh write-tree  
+```
+
+## commit-tree
+Creates a new commit object with a given tree object and commit message, and optionally a parent commit.
+```bash
+./mygit.sh commit-tree <tree-object-hash> <options>
+```
+
+### options
+`-p` : parent hash of a tree object
+`-m` : commit message
+
+### example
 ```sh
-alias mygit=/path/to/your/repo/your_program.sh
+./mygit.sh commit-tree <tree-object-hash> -p <parent-tree-object-hash> -m <commit-message>
+```
 
-mkdir -p /tmp/testing && cd /tmp/testing
-mygit init
+## add
+Stages changes (new or modified files) for the next commit.
+```bash
+./mygit.sh add <file-paths>
+```
+
+## commit
+Records staged changes to the repository with a commit message.
+```bash
+./mygit.sh commit -m <commit-msg>
+```
+
+## checkout
+Switches to a commit, updating the working directory to reflect that state.
+```bash
+./mygit.sh checkout <commit-object-sha>
 ```
